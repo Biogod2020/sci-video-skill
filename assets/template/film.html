@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>film</title>
+<style>
+/* Put the font file next to the film and name it here. A font that is not loaded before the first frame makes the first frames differ. */
+/* @font-face { font-family: "Inter"; src: url("assets/InterVariable.ttf"); font-weight: 100 900; } */
+html, body { margin: 0; background: #fff; overflow: hidden; }
+canvas { display: block; }
+.pre { position: absolute; left: -9999px; top: 0; }
+</style>
+<!-- fonts and images used only on the canvas: referenced here so they are loaded before the first frame -->
+<div class="pre"><span style="font-family:Inter;font-weight:400">a</span><span style="font-family:Inter;font-weight:600">a</span></div>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="captions.js"></script>
+<script src="build/vo_warp.js" onerror="0"></script>   <!-- absent until the narration is planned: the film then runs on the picture clock -->
+<script src="film_core.js"></script>
+<script>
+const q = new URLSearchParams(location.search).get('t');
+renderAt(q ? +q : 0);
+</script>

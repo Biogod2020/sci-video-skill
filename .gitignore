@@ -1,0 +1,8 @@
+build/
+frames/
+stills/
+*.mp4
+*.wav
+__pycache__/
+.env
+review_feedback.json
