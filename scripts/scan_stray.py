@@ -7,7 +7,10 @@ Flags, per clip:
   EDGE  the clip does not start or end in silence (it will click when placed on the timeline)
   PAUSE a silence longer than 0.7 s inside the clip
 "hiss" marks a sound whose energy sits above 4 kHz (s, t, ts), the usual leftover of a cut made inside a word boundary.
-Listen to every flagged clip around the printed time before deciding; soft breaths can be flagged too."""
+Listen to every flagged clip around the printed time before deciding; soft breaths can be flagged too.
+A HEAD hiss is usually NOT an extra sound: it is the last consonant of the previous line ("dataset|s"), cut off because
+the splitter took the closure of a "t" for the pause between lines. Move it back to the end of the previous clip (cut
+the previous line from the take again, up to the end of the hiss); deleting it leaves the previous word chopped off."""
 import glob, os, sys
 import numpy as np, soundfile as sf
 

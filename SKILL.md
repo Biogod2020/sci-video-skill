@@ -77,7 +77,7 @@ film folder. They need `node` with `puppeteer`, `ffmpeg`, and Python with `numpy
 | 3. Picture | Write the world, camera path and scenes (`film_core.js` + scene files). `node render.mjs stills t1,t2,...` then `sheet.py`. | You have looked at a still for every caption. Storyboard sheets reviewed by Gemini and shown to the user **before** any full render. |
 | 4. Voice samples | 3-4 stock voices reading the same first paragraph (`tts.py`), equal loudness, on the review page. | The user picked one by ear. Never clone a voice. |
 | 5. Narration | One TTS call per paragraph → `clean_takes.py take` → `split_lines.py` → `clean_takes.py clips` → `scan_stray.py`. | Every line transcribes to its text; no clip is flagged, or each flag was listened to and fixed. |
-| 6. Timing | `vo_plan.py` lays the lines on the clock and stretches the picture where speech is longer. | Stills re-checked at the new times of a few lines; nothing sped up. |
+| 6. Timing | `vo_plan.py` lays the lines on the clock and stretches the picture where speech is longer; `until` holds a scene until its line is spoken. | A still 0.3 s before every line's speech ends still shows that line's picture; nothing sped up. |
 | 7. Render | `node render.mjs frames 30 8` (30 fps, 8 parallel Chrome workers), then `mux.sh` (voice only, and voice + rhythm). | Durations of picture and sound match; final checklist in `references/defects.md` passed. |
 | 8. Review | Write `REVIEW.json` (videos, scenes, change list; format in the script's header), run `review_server.py REVIEW.json`, give the user the link. | `review_feedback.json` (saved by the page when the user presses Save) read; every comment answered. |
 

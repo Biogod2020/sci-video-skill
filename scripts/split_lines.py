@@ -6,7 +6,8 @@ PARA.json = [{"id": "a1", "text": "..."}, ...] in spoken order -> OUT_DIR/line_<
    silence is not used: it can be a pause inside a line, which would move a word into the wrong clip.
 3. Each piece is transcribed again; a word error rate above 0.15 is printed with CHECK (read the printed transcript: the
    recogniser writing "300,000" for "three hundred thousand" also counts as errors). Then run scan_stray.py:
-   the word check cannot hear a doubled "s" or a click.
+   the word check cannot hear a doubled "s" or a click. A short silence inside a word (the closure before a "t", as in
+   "datase|ts") can be taken for the pause between lines; scan_stray.py's HEAD hiss on the next clip shows it.
 Needs faster-whisper, soundfile, numpy, scipy."""
 import argparse, json, re
 from pathlib import Path

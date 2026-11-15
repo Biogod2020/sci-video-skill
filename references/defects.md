@@ -27,6 +27,7 @@ user sees the cut.
 | First frames in a fallback font | Fonts not loaded before frame 0 | Reference fonts in the page; wait for `document.fonts.ready` | Compare the still at t = 0 with one at t = 1 |
 | Render takes far too long | One browser, serial frames | `render.mjs frames 30 8` | Time 100 frames first |
 | Full re-render for a small audio fix | Clip length changed → plan shifted | Pad the fixed clip to its old length | `plan.json` duration identical before and after |
+| Scene leaves while its line is still spoken | The slot was stretched for longer speech, but the stretch is spread over the whole slot, so a fold-away or camera move near its end starts early | `until` on that line: the picture waits at that point until the line is spoken | Still 0.3 s before every line's speech ends: it must still show that line's picture |
 | Caption gone before it can be read | Slot shorter than the speech | `vo_plan.py` stretches the slot | `plan.json`: every `slot` ≥ `voice_sec` + gap |
 
 ## Sound
@@ -34,7 +35,8 @@ user sees the cut.
 | Defect | Root cause | Prevent | Check |
 | --- | --- | --- | --- |
 | Click at the very start, noise burst at the end of a take | API returned a whole WAV (header + provenance chunk) and it was written as samples | `tts.py` keeps only the data chunk | `clean_takes.py take` prints removed bursts; `scan_stray.py` EDGE flag |
-| Doubled "s" / leftover syllable at a join | Extra sound in the raw take, or a cut inside a word boundary | Cut at the last silence before the next line | `scan_stray.py` HEAD/TAIL (hiss) on every clip; listen to flagged ones |
+| Doubled "s" at a join | The cut fell in the "t" closure of "datasets": the final "s" went to the next clip, so it is heard after the pause | Move the hiss back to the end of the previous clip; never just delete it | `scan_stray.py` HEAD (hiss) on the next clip |
+| Last word chopped off after an audio fix | The fix trimmed the previous clip as well | After every audio edit, re-transcribe both neighbouring clips and look at the last word's end time | Word timestamps of the edited clips; listen to the join |
 | Word in the wrong clip | Cut at the longest silence, which was a pause inside a line | `split_lines.py` rule + per-piece transcription | WER per piece printed; read every CHECK line |
 | Long dead pause inside a line | TTS hesitation | Re-take that paragraph, or shorten the silence | `clean_takes.py` and `scan_stray.py` PAUSE flag (> 0.7 s) |
 | Pace and loudness drift | Whole script in one take | Paragraph takes; per-paragraph gain | Words per 30 s at the start vs the end; loudness per paragraph |
@@ -63,6 +65,8 @@ Run all of it; tick nothing from memory.
 - [ ] Every line's transcript read against its text (numbers and names especially).
 - [ ] `scan_stray.py` on the split folder: 0 flagged, or each flag listened to.
 - [ ] Each acronym and each number heard once in the final mix.
+- [ ] Still 0.3 s before each line's speech ends shows that line's picture (no scene leaving early).
+- [ ] After any audio edit: both neighbouring clips re-transcribed, last word complete.
 - [ ] `plan.json`: no negative gaps, nothing sped up; film duration equals audio duration (ffprobe).
 - [ ] Voice −17 LUFS; rhythm version and voice-only version both produced.
 - [ ] Every number in captions matched to its source file today.

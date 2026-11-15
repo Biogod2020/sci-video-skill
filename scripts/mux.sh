@@ -12,7 +12,7 @@ ffmpeg -y -loglevel error -i "$voice" -af "loudnorm=I=-17:TP=-1.5:LRA=11,apad=wh
 ffmpeg -y -loglevel error -i "${out}_silent.mp4" -i "${out}_voice_n.wav" -c:v copy -c:a aac -b:a 192k -shortest "${out}_voice_only.mp4"
 if [ "${4:-}" = "--rhythm" ]; then
   "${PYTHON:-python3}" "$here/rhythm.py" "${out}_rhythm.wav" "$dur"
-  ffmpeg -y -loglevel error -i "${out}_voice_n.wav" -i "${out}_rhythm.wav" -filter_complex "[1:a]volume=-9.8dB[r];[0:a][r]amix=inputs=2:normalize=0,alimiter=limit=0.89[a]" -map "[a]" -ar 48000 "${out}_mix.wav"
+  ffmpeg -y -loglevel error -i "${out}_voice_n.wav" -i "${out}_rhythm.wav" -filter_complex "[1:a]volume=-9.8dB[r];[0:a][r]amix=inputs=2:normalize=0,alimiter=limit=0.89:level=disabled[a]" -map "[a]" -ar 48000 "${out}_mix.wav"
   ffmpeg -y -loglevel error -i "${out}_silent.mp4" -i "${out}_mix.wav" -c:v copy -c:a aac -b:a 192k -shortest "${out}_voice_rhythm.mp4"
 fi
 for f in "${out}"_*.mp4; do echo "$f $(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f") s"; done

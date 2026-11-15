@@ -1,7 +1,11 @@
 """Lay the split narration lines on the film's clock and write the picture's time warp.
   vo_plan.py LINES_JSON SPLIT_DIR OUT_DIR --end PICTURE_SECONDS
-LINES_JSON = [{"id": "a1", "para": "P1", "at": 3.2, "text": "..."}]: `at` is the second ON THE PICTURE'S OWN CLOCK (the clock the
-animation was written on) at which the line's caption appears; SPLIT_DIR holds line_<id>_0.wav.
+LINES_JSON = [{"id": "a1", "para": "P1", "at": 3.2, "text": "...", "until": 5.9}]: `at` is the second ON THE PICTURE'S OWN CLOCK
+(the clock the animation was written on) at which the line's caption appears; SPLIT_DIR holds line_<id>_0.wav.
+Optional `until`: a picture time inside the line's slot that the picture may not pass before the line has been spoken
+(+0.25 s); after it the picture plays at normal speed. Use it wherever the scene starts to leave (fold away, camera move,
+result fades) before the next caption: without it the extra time is spread over the whole slot, so the scene leaves
+while the narrator is still talking about it.
 Each line starts LEAD s after its caption appears. A caption's slot keeps its picture length unless the spoken line plus
 GAP s is longer; then the slot (and the picture under it) is stretched. Nothing is ever sped up: speech that is too
 long makes the film longer, it does not make the voice faster.
@@ -36,10 +40,16 @@ for p in sorted({ln.get("para", "") for ln in lines}):
 s = [float(ln["at"]) for ln in lines] + [a.end]
 assert all(y > x for x, y in zip(s, s[1:])), "caption times must increase and end before --end"
 dur = [len(clip[ln["id"]]) / SR for ln in lines]
-n = [s[0]]
-for i in range(len(lines)):
-    n.append(n[-1] + max(s[i + 1] - s[i], dur[i] + a.gap + a.lead))
-warp = [[0, 0]] + [[round(x, 3), round(y, 3)] for x, y in zip(n, s)]
+HOLD = 0.25
+n, extra = [s[0]], []
+for i, ln in enumerate(lines):
+    if "until" in ln:
+        u = float(ln["until"]); assert s[i] < u < s[i + 1], ln["id"] + ": until must lie inside the line's slot"
+        first = max(u - s[i], a.lead + dur[i] + HOLD); extra.append([n[-1] + first, u])
+        n.append(n[-1] + max(first + (s[i + 1] - u), dur[i] + a.gap + a.lead))
+    else:
+        n.append(n[-1] + max(s[i + 1] - s[i], dur[i] + a.gap + a.lead))
+warp = sorted([[0, 0]] + [[round(x, 3), round(y, 3)] for x, y in zip(n, s)] + [[round(x, 3), round(y, 3)] for x, y in extra])
 voice = np.zeros(int(n[-1] * SR) + SR)
 for i, ln in enumerate(lines):
     c = clip[ln["id"]]; k = int((n[i] + a.lead) * SR); voice[k:k + len(c)] += c

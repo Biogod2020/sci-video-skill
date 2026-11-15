@@ -17,8 +17,12 @@ ROWS = [
     ("s1", "P3", 19.5, "So we built a tool that reads them all and writes one common record.", None),
 ]
 
+# picture time that the picture may not pass before the line is spoken; put one wherever a scene starts to leave
+# before the next caption (check: a still 0.3 s before each line's speech ends must still show that line's picture)
+UNTIL = {"p2": 18.0}
+
 os.makedirs("build", exist_ok=True)
-lines = [{"id": i, "para": p, "at": at, "text": sp or cap} for i, p, at, cap, sp in ROWS]
+lines = [{"id": i, "para": p, "at": at, "text": sp or cap, **({"until": UNTIL[i]} if i in UNTIL else {})} for i, p, at, cap, sp in ROWS]
 json.dump(lines, open("build/lines.json", "w"), indent=1, ensure_ascii=False)
 paras = sorted({p for _, p, *_ in ROWS})
 json.dump([{"id": p, "text": " ".join(l["text"] for l in lines if l["para"] == p)} for p in paras], open("build/paras.json", "w"), indent=1, ensure_ascii=False)
